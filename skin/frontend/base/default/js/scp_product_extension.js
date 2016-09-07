@@ -86,7 +86,7 @@ Product.Config.prototype.getProductIdOfMostExpensiveProductInScope = function(pr
     //Get highest price from product ids.
     for (var x=0, len=productIds.length; x<len; ++x) {
         var thisPrice = Number(childProducts[productIds[x]][priceType]);
-        if (thisPrice >= maxPrice) {
+        if (thisPrice > maxPrice) {
             maxPrice = thisPrice;
             highestPricedProdId = productIds[x];
         }
@@ -155,7 +155,7 @@ Product.Config.prototype.reloadPrice = function() {
         usingZoomer = true;
     }
 
-    if(childProductId){
+    if (childProductId){
         var price = childProducts[childProductId]["price"];
         var finalPrice = childProducts[childProductId]["finalPrice"];
         optionsPrice.productPrice = finalPrice;
@@ -163,7 +163,7 @@ Product.Config.prototype.reloadPrice = function() {
         optionsPrice.reload();
         optionsPrice.reloadPriceLabels(true);
         optionsPrice.updateSpecialPriceDisplay(price, finalPrice);
-        this.updateProductInfo(childProductId);
+		this.updateProductInfo(childProductId);
         this.updateProductShortDescription(childProductId);
         this.updateProductDescription(childProductId);
         this.updateProductName(childProductId);
@@ -187,7 +187,7 @@ Product.Config.prototype.reloadPrice = function() {
         optionsPrice.reload();
         optionsPrice.reloadPriceLabels(false);
         optionsPrice.updateSpecialPriceDisplay(price, finalPrice);
-        this.updateProductInfo(false);
+		this.updateProductInfo(false);
         this.updateProductShortDescription(false);
         this.updateProductDescription(false);
         this.updateProductName(false);
@@ -234,14 +234,16 @@ Product.Config.prototype.updateProductName = function(productId) {
         el.innerHTML = productName;
     });
 };
+
 //Add Info attribute
 Product.Config.prototype.updateProductInfo = function(productId) {
     var info = this.config.info;
     if (productId && this.config.childProducts[productId].info) {
         info = this.config.childProducts[productId].info;
     }
-    $$('#product_addtocart_form div.short-description div.std').each(function(el) {
+    $$('div.info-info table.data-table').each(function(el) {
         el.innerHTML = info;
+		decorateTable('#product-attribute-specs-table');
     });
 };
 
@@ -273,9 +275,9 @@ Product.Config.prototype.updateProductAttributes = function(productId) {
     //If config product doesn't already have an additional information section,
     //it won't be shown for associated product either. It's too hard to work out
     //where to place it given that different themes use very different html here
-    $$('div.product-collateral div.box-additional').each(function(el) {
+    $$('div.product-collateral table.data-table').each(function(el) {
         el.innerHTML = productAttributes;
-        decorateTable('product-attribute-specs-table');
+        decorateTable('#product-attribute-specs-table');
     });
 };
 
@@ -305,7 +307,7 @@ Product.Config.prototype.showCustomOptionsBlock = function(productId, parentId) 
         });
     } else {
         $('SCPcustomOptionsDiv').innerHTML = '';
-        try{window.opConfig = new Product.Options([]);} catch(e){}
+        window.opConfig = new Product.Options([]);
     }
 };
 
@@ -320,10 +322,6 @@ Product.Config.prototype.showFullImageDiv = function(productId, parentId) {
         destElement = el;
     });
 
-    //TODO: This is needed to reinitialise Product.Zoom correctly,
-    //but there's still a race condition (in the onComplete below) which can break it
-    try {product_zoom.draggable.destroy();} catch(x) {}
-
     if(productId) {
         new Ajax.Updater(destElement, imgUrl, {
             method: 'get',
@@ -333,8 +331,8 @@ Product.Config.prototype.showFullImageDiv = function(productId, parentId) {
                 //to have loaded before it works, hence image object and onload handler
                 if ($('image')){
                     var imgObj = new Image();
-                    imgObj.onload = function() {product_zoom = new Product.Zoom('image', 'track', 'handle', 'zoom_in', 'zoom_out', 'track_hint'); };
                     imgObj.src = $('image').src;
+                    imgObj.onload = function() {product_zoom = new Product.Zoom('image', 'track', 'handle', 'zoom_in', 'zoom_out', 'track_hint'); };
                 } else {
                     destElement.innerHTML = defaultZoomer;
                     product_zoom = new Product.Zoom('image', 'track', 'handle', 'zoom_in', 'zoom_out', 'track_hint')
